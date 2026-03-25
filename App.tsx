@@ -1,45 +1,30 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React from 'react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { NavigationContainer } from '@react-navigation/native';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useAppStore } from './src/store/useAppStore';
+import { AuthNavigator } from './src/navigation/AuthNavigator';
+import { MainNavigator } from './src/navigation/MainNavigator';
+import { SocketProvider } from './src/context/SocketContext';
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+const queryClient = new QueryClient();
 
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+const App = () => {
+  const { token, driver } = useAppStore();
+  
+  console.log('App Rendering. Auth State ->', { hasToken: !!token, hasDriver: !!driver });
 
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
+      <QueryClientProvider client={queryClient}>
+        <SocketProvider>
+          <NavigationContainer>
+            {token && driver ? <MainNavigator /> : <AuthNavigator />}
+          </NavigationContainer>
+        </SocketProvider>
+      </QueryClientProvider>
     </SafeAreaProvider>
   );
-}
-
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
-  return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
+};
 
 export default App;

@@ -1,97 +1,63 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# AIRPAX Driver Application
 
-# Getting Started
+AIRPAX is a premium ride-hailing application. This repository contains the mobile application for AIRPAX Drivers, built with React Native.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Tech Stack
+- **Framework:** React Native (`0.76.6` / latest stable architecture)
+- **Language:** TypeScript
+- **Navigation:** React Navigation (`@react-navigation/native`, `@react-navigation/native-stack`)
+- **Maps:** `react-native-maps` for embedded Google Maps experience
+- **State Management:** Zustand
+- **Networking:** Axios, Socket.IO
+- **UI Components:** Custom built (Glassmorphism, Elevated Cards, Premium Dark Theme)
 
-## Step 1: Start Metro
+## Recent Updates (Phase 1 UI Implementation)
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+The app interface has been completely overhauled to align with the new **AIRPAX Premium Design System**.
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+### Design System Insights
+- **Color Palette:** Shifted to a sophisticated dark theme.
+  - Primary Background: Dark Navy (`#0A1128`)
+  - Surface/Card: Elevated (`#1A2238`), Glassmorphism.
+  - Accents: Gold (`#D4AF37`) & Amber (`#FFC107`).
+- **Typography:** Modern, legible font stack with standardized variants (`h1`, `h2`, `body`, `caption`, `label`).
+- **Components:** Created/upgraded standard components: `Button`, `Card`, `Input`, `Typography`, `Badge`, `BottomSheet`, `MapMarker`, `TimerRing`, `RideCard`.
 
-```sh
-# Using npm
-npm start
+### Redesigned Screens
+- **Authentication:** Sleek `LoginScreen` and `OTPScreen` with loading states.
+- **Core Dashboard:** Map-centric layout with an `isOnline` toggle and dynamic bottom drawer (`DashboardScreen`).
+- **Ride Flow:** Complete end-to-end premium ride flow:
+  - `RideAssignmentScreen` (Accept/Decline with BottomSheet details)
+  - `NavigateToPickupScreen` (Routing to rider)
+  - `RideStartScreen` (OTP verification to start trip)
+  - `RideProgressScreen` (Real-time live trip stats and SOS)
+  - `RideCompletedScreen` (Success badge, fare details, and explicit Payment modes)
+- **Management:** 
+  - `ShiftManagementScreen` (Duty toggles, stats, preferences)
+  - `EarningsScreen` (Financial overview, trip history)
+  - `ProfileScreen` (Driver rating, vehicle details, document verification status)
 
-# OR using Yarn
-yarn start
-```
+## Setup & Running
 
-## Step 2: Build and run your app
+1. **Install Dependencies**
+   ```bash
+   npm install
+   ```
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+2. **Start the Metro Bundler**
+   ```bash
+   npm start
+   ```
 
-### Android
+3. **Run the App**
+   ```bash
+   # Android
+   npm run android
+   
+   # iOS (ensure pods are installed)
+   cd ios && pod install && cd ..
+   npm run ios
+   ```
 
-```sh
-# Using npm
-npm run android
+*(Note: Appropriate Google Maps API keys are required in `AndroidManifest.xml` and AppDelegate for full map functionality.)*
 
-# OR using Yarn
-yarn android
-```
-
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
-
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
