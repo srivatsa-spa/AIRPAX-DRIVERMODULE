@@ -11,7 +11,14 @@ export interface RideRequest {
   riderId: string;
   pickup: Location;
   dropoff: Location;
-  fare: number;
+  fare: {
+    baseFare: number;
+    distanceFare: number;
+    waitingFare: number;
+    surcharge: number;
+    gst: number;
+    total: number;
+  };
   distance: number;
   duration: number;
   status: 'pending' | 'accepted' | 'arrived' | 'in_progress' | 'completed' | 'cancelled';

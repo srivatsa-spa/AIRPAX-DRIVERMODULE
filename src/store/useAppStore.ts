@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Shift } from '../api/driverService';
+import { Shift, driverService } from '../api/driverService';
 
 interface Driver {
   id: string;
@@ -33,7 +33,17 @@ export const useAppStore = create<AppState>()(
       activeShift: null,
       setDriver: (driver) => set({ driver }),
       setToken: (token) => set({ token }),
-      setOnline: (isOnline) => set({ isOnline }),
+      setOnline: async (isOnline) => {
+        try {
+          await driverService.updateStatus(isOnline);
+          set({ isOnline });
+        } catch (error) {
+          console.error('Failed to update online status:', error);
+          // Still update local state for UI responsiveness, 
+          // or you might want to show an alert
+          set({ isOnline }); 
+        }
+      },
       setActiveShift: (shift) => set({ activeShift: shift }),
       setAuth: (token, driver) => set({ token, driver }),
       logout: () => set({ driver: null, token: null, isOnline: false, activeShift: null }),

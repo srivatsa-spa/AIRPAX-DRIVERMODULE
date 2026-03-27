@@ -6,6 +6,7 @@ import { Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MainStackParamList } from '../navigation/MainNavigator';
+import { mapBackendToFrontendRide } from '../utils/mapUtils';
 
 type NavigationProp = NativeStackNavigationProp<MainStackParamList>;
 
@@ -18,10 +19,13 @@ export const useRideEvents = () => {
     if (!socket || !isConnected) return;
 
     // Handle incoming ride request
-    socket.on('ride_request', (request: RideRequest) => {
-      console.log('Incoming ride request:', request);
-      setIncomingRequest(request);
-      navigation.navigate('RideAssignment');
+    socket.on('ride_request', (data: any) => {
+      console.log('Incoming ride request (raw):', data);
+      const mappedRequest = mapBackendToFrontendRide(data);
+      if (mappedRequest) {
+        setIncomingRequest(mappedRequest);
+        navigation.navigate('RideAssignment');
+      }
     });
 
     // Handle ride cancellation by rider

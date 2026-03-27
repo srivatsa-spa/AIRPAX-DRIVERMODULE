@@ -7,7 +7,7 @@ import { useAppStore } from '../../store/useAppStore';
 import { driverService } from '../../api/driverService';
 
 export const ProfileScreen = ({ navigation }: any) => {
-  const { driver, setDriver } = useAppStore();
+  const { driver, setDriver, logout } = useAppStore();
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchProfile = React.useCallback(async () => {
@@ -140,6 +140,14 @@ export const ProfileScreen = ({ navigation }: any) => {
             style={styles.editButton} 
             onPress={() => {}}
           />
+
+          <Button 
+            label="LOG OUT" 
+            variant="danger"
+            size="lg"
+            style={styles.logoutButton} 
+            onPress={logout}
+          />
           <View style={styles.bottomPadding} />
         </ScrollView>
       </SafeAreaView>
@@ -222,6 +230,9 @@ const styles = StyleSheet.create({
     marginHorizontal: SPACING.lg,
   },
   editButton: {
+    marginBottom: SPACING.xl,
+  },
+  logoutButton: {
     marginBottom: SPACING.xl,
   },
   bottomPadding: {

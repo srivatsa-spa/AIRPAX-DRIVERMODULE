@@ -41,8 +41,8 @@ export const NavigateToPickupScreen = ({ navigation }: any) => {
         provider={PROVIDER_GOOGLE}
         style={styles.map}
         initialRegion={{
-          latitude: location?.latitude || currentRide.pickup.latitude,
-          longitude: location?.longitude || currentRide.pickup.longitude,
+          latitude: currentRide.pickup?.latitude || 0,
+          longitude: currentRide.pickup?.longitude || 0,
           latitudeDelta: 0.04,
           longitudeDelta: 0.04,
         }}
@@ -55,13 +55,15 @@ export const NavigateToPickupScreen = ({ navigation }: any) => {
             coordinate={{ latitude: location.latitude, longitude: location.longitude }} 
           />
         )}
-        <MapMarker 
-          type="pickup" 
-          coordinate={{ latitude: currentRide.pickup.latitude, longitude: currentRide.pickup.longitude }}
-        />
+        {currentRide.pickup && (
+          <MapMarker 
+            type="pickup" 
+            coordinate={{ latitude: currentRide.pickup.latitude, longitude: currentRide.pickup.longitude }}
+          />
+        )}
 
         {/* ETA Bubble attached directly to the destination */}
-        <Marker coordinate={{ latitude: currentRide.pickup.latitude, longitude: currentRide.pickup.longitude }} anchor={{ x: 0.5, y: 1.5 }}>
+        <Marker coordinate={{ latitude: currentRide.pickup?.latitude || 0, longitude: currentRide.pickup?.longitude || 0 }} anchor={{ x: 0.5, y: 1.5 }}>
           <View style={styles.etaBubble}>
             <Typography variant="caption" bold color="#0F172A">
               🕒 ETA 4 mins

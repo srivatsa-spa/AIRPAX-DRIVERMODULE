@@ -1,0 +1,55 @@
+diff --git a/node_modules/react-native-gesture-handler/android/build.gradle b/node_modules/react-native-gesture-handler/android/build.gradle
+index 6348d17..2f6039f 100644
+--- a/node_modules/react-native-gesture-handler/android/build.gradle
++++ b/node_modules/react-native-gesture-handler/android/build.gradle
+@@ -1,5 +1,5 @@
+ import groovy.json.JsonSlurper
+-import com.android.build.gradle.tasks.ExternalNativeBuildJsonTask
++// Removed problematic AGP import
+ 
+ buildscript {
+     def kotlin_version = rootProject.ext.has('kotlinVersion') ? rootProject.ext.get('kotlinVersion') : project.properties['RNGH_kotlinVersion']
+@@ -17,11 +17,7 @@ buildscript {
+ }
+ 
+ def isNewArchitectureEnabled() {
+-    // To opt-in for the New Architecture, you can either:
+-    // - Set `newArchEnabled` to true inside the `gradle.properties` file
+-    // - Invoke gradle with `-newArchEnabled=true`
+-    // - Set an environment variable `ORG_GRADLE_PROJECT_newArchEnabled=true`
+-    return project.hasProperty("newArchEnabled") && project.newArchEnabled == "true"
++    return false
+ }
+ 
+ def safeExtGet(prop, fallback) {
+@@ -70,7 +66,7 @@ if (project == rootProject) {
+ 
+ def getExternalLibVersion(project){
+     def inputFile = new File(project.projectDir, "../package.json")
+-    def json = new JsonSlurper().parseText(inputFile.text)
++    def json = new groovy.json.JsonSlurper().parseText(inputFile.text)
+     def libVerision = json.version as String
+     def (major, minor, patch) = libVerision.tokenize('.')
+ 
+@@ -214,16 +210,17 @@ android {
+     }
+ 
+     if (isGHExampleApp()) {
+-        tasks.withType(ExternalNativeBuildJsonTask).configureEach {
+-            compileTask ->
+-                compileTask.doLast {
++        tasks.configureEach { task ->
++            if (task.class.name.endsWith("ExternalNativeBuildJsonTask")) {
++                task.doLast {
+                     def rootDir = new File("${project.projectDir}/..")
+-                    def generated = new File("${compileTask.abi.getCxxBuildFolder()}/compile_commands.json")
++                    def generated = new File("${task.abi.getCxxBuildFolder()}/compile_commands.json")
+                     def output = new File("${rootDir}/compile_commands.json")
+                     output.text = generated.text
+ 
+                     println("Generated clangd metadata.")
+                 }
++            }
+         }
+     }
+ }

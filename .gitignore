@@ -76,3 +76,6 @@ yarn-error.log
 
 bundle*.js
 metro-error.json
+
+# Android build logs
+android/*.txt

@@ -38,16 +38,18 @@ export const RideStartScreen = ({ navigation }: any) => {
         provider={PROVIDER_GOOGLE}
         style={styles.map}
         initialRegion={{
-          latitude: currentRide.pickup.latitude,
-          longitude: currentRide.pickup.longitude,
+          latitude: currentRide.pickup?.latitude || 0,
+          longitude: currentRide.pickup?.longitude || 0,
           latitudeDelta: 0.04,
           longitudeDelta: 0.04,
         }}
       >
-        <MapMarker 
-          type="pickup"
-           coordinate={{ latitude: currentRide.pickup.latitude, longitude: currentRide.pickup.longitude }}
-        />
+        {currentRide.pickup && (
+          <MapMarker 
+            type="pickup"
+             coordinate={{ latitude: currentRide.pickup.latitude, longitude: currentRide.pickup.longitude }}
+          />
+        )}
         {location && (
           <MapMarker 
             type="driver" 

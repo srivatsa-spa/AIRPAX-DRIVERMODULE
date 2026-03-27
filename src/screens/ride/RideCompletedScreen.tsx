@@ -7,7 +7,7 @@ import { SPACING, RADIUS } from '../../theme';
 import { useRideStore } from '../../store/useRideStore';
 
 export const RideCompletedScreen = ({ navigation }: any) => {
-  const { clearRide } = useRideStore();
+  const { clearRide, currentRide } = useRideStore();
 
   const handleFinish = () => {
     clearRide();
@@ -39,6 +39,30 @@ export const RideCompletedScreen = ({ navigation }: any) => {
           <Typography variant="body" color="#64748B" style={styles.subtitle}>
             Trip payment successfully confirmed.
           </Typography>
+        </View>
+
+        {/* Fare Breakdown Card */}
+        <View style={styles.card}>
+          <Typography variant="caption" bold color="#64748B" style={{ marginBottom: 12 }}>
+            FARE BREAKDOWN
+          </Typography>
+          <View style={styles.fareRow}>
+             <Typography variant="body" color="#475569">Base Fare</Typography>
+             <Typography variant="body" bold color="#0F172A">₹{currentRide?.fare?.baseFare || 0}</Typography>
+          </View>
+          <View style={styles.fareRow}>
+             <Typography variant="body" color="#475569">Distance Fare</Typography>
+             <Typography variant="body" bold color="#0F172A">₹{currentRide?.fare?.distanceFare || 0}</Typography>
+          </View>
+          <View style={styles.fareRow}>
+             <Typography variant="body" color="#475569">Time Fare</Typography>
+             <Typography variant="body" bold color="#0F172A">₹{currentRide?.fare?.waitingFare || 0}</Typography>
+          </View>
+          <View style={styles.rowDivider} />
+          <View style={styles.fareRow}>
+             <Typography variant="h3" bold color="#0F172A">Total Earning</Typography>
+             <Typography variant="h3" bold color="#10B981">₹{currentRide?.fare?.total || 0}</Typography>
+          </View>
         </View>
 
         {/* Goal Progress Card */}
@@ -196,5 +220,15 @@ const styles = StyleSheet.create({
   },
   linkButton: {
     paddingVertical: SPACING.xs,
+  },
+  fareRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  rowDivider: {
+    height: 1,
+    backgroundColor: '#E2E8F0',
+    marginVertical: 12,
   },
 });

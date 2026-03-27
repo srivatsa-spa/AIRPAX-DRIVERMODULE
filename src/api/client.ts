@@ -1,9 +1,7 @@
 import axios from 'axios';
 import { useAppStore } from '../store/useAppStore';
 
-const BASE_URL = __DEV__ 
-  ? 'http://10.0.2.2:5000' // Android Emulator
-  : 'https://api.airpax.in'; // Production
+const BASE_URL = 'http://airpaxbe.spaplc.com';
 
 export const apiClient = axios.create({
   baseURL: BASE_URL,

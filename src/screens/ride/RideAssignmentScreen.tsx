@@ -8,12 +8,46 @@ import { SPACING, RADIUS, SHADOWS } from '../../theme';
 import { useRideStore } from '../../store/useRideStore';
 import { rideService } from '../../api/rideService';
 import { useLocation } from '../../hooks/useLocation';
+import { decodePolyline } from '../../utils/mapUtils';
+import { Polyline } from 'react-native-maps';
 
 export const RideAssignmentScreen = ({ navigation }: any) => {
   const { incomingRequest, setCurrentRide, setIncomingRequest } = useRideStore();
   const { location } = useLocation();
   const [isLoading, setIsLoading] = useState(false);
-  const [countdown, setCountdown] = useState(3);
+  const [countdown, setCountdown] = useState(30); // Increased for testing
+  const [routeCoordinates, setRouteCoordinates] = useState<any[]>([]);
+
+  const fetchRoute = async (start: any, end: any) => {
+    const API_KEY = 'GOOGLE_MAPS_API_KEY';
+    if (API_KEY === 'GOOGLE_MAPS_API_KEY') {
+       setRouteCoordinates([start, end]);
+       return;
+    }
+
+    try {
+      const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${start.latitude},${start.longitude}&destination=${end.latitude},${end.longitude}&key=${API_KEY}`;
+      const response = await fetch(url);
+      const json = await response.json();
+      if (json.routes.length > 0) {
+        const points = json.routes[0].overview_polyline.points;
+        const coords = decodePolyline(points);
+        setRouteCoordinates(coords);
+      }
+    } catch (error) {
+       console.error('Route Fetch Error:', error);
+       setRouteCoordinates([start, end]); 
+    }
+  };
+
+  useEffect(() => {
+    if (location && incomingRequest?.pickup) {
+       fetchRoute(
+         { latitude: location.latitude, longitude: location.longitude },
+         { latitude: incomingRequest.pickup.latitude, longitude: incomingRequest.pickup.longitude }
+       );
+     }
+  }, [incomingRequest?.id, location?.latitude, location?.longitude]);
 
   // Auto-accept countdown logic
   useEffect(() => {
@@ -70,8 +104,8 @@ export const RideAssignmentScreen = ({ navigation }: any) => {
         provider={PROVIDER_GOOGLE}
         style={styles.map}
         initialRegion={{
-          latitude: incomingRequest.pickup.latitude,
-          longitude: incomingRequest.pickup.longitude,
+          latitude: incomingRequest?.pickup?.latitude || 0,
+          longitude: incomingRequest?.pickup?.longitude || 0,
           latitudeDelta: 0.04,
           longitudeDelta: 0.04,
         }}
@@ -86,10 +120,19 @@ export const RideAssignmentScreen = ({ navigation }: any) => {
             coordinate={{ latitude: location.latitude, longitude: location.longitude }} 
           />
         )}
-        <MapMarker 
-          type="pickup" 
-          coordinate={{ latitude: incomingRequest.pickup.latitude, longitude: incomingRequest.pickup.longitude }}
-        />
+        {incomingRequest?.pickup && (
+          <MapMarker 
+            type="pickup" 
+            coordinate={{ latitude: incomingRequest.pickup.latitude, longitude: incomingRequest.pickup.longitude }}
+          />
+        )}
+        {routeCoordinates.length > 0 && (
+          <Polyline 
+            coordinates={routeCoordinates}
+            strokeColor={styles.goldLine.backgroundColor}
+            strokeWidth={4}
+          />
+        )}
       </MapView>
 
       {/* Overlay Card Container */}
@@ -108,7 +151,7 @@ export const RideAssignmentScreen = ({ navigation }: any) => {
                 PICKUP LOCATION
               </Typography>
               <Typography variant="h2" bold color="#0F172A" style={styles.hubTitle}>
-                {incomingRequest.pickup.address || 'Cyber Hub'}
+                {incomingRequest.pickup?.address || 'Pickup Point'}
               </Typography>
               <Typography variant="body" color="#475569">
                 {incomingRequest.distance || '2.1'} KM away
@@ -116,6 +159,18 @@ export const RideAssignmentScreen = ({ navigation }: any) => {
             </View>
             <View style={styles.navIconContainer}>
               <Navigation size={24} color="#0F172A" fill="#E2E8F0" />
+            </View>
+          </View>
+
+          {/* Earnings Estimate */}
+          <View style={styles.fareBox}>
+            <View style={styles.fareHeader}>
+              <Typography variant="caption" bold color="#64748B">EXPECTED EARNINGS</Typography>
+              <Typography variant="h1" bold color="#10B981">₹{incomingRequest.fare?.total || 0}</Typography>
+            </View>
+            <View style={styles.fareDivider} />
+            <View style={styles.fareBreakdown}>
+               <Typography variant="caption" color="#94A3B8">Includes Distance + Time Fare</Typography>
             </View>
           </View>
 
@@ -267,5 +322,27 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.md,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  fareBox: {
+    width: '100%',
+    backgroundColor: '#F8FAFC',
+    borderRadius: RADIUS.lg,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  fareHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  fareDivider: {
+    height: 1,
+    backgroundColor: '#E2E8F0',
+    marginVertical: SPACING.md,
+  },
+  fareBreakdown: {
+    alignItems: 'center',
   },
 });

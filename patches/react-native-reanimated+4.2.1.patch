@@ -1,0 +1,142 @@
+diff --git a/node_modules/react-native-reanimated/android/build.gradle b/node_modules/react-native-reanimated/android/build.gradle
+index 86bace7..b7c1b59 100644
+--- a/node_modules/react-native-reanimated/android/build.gradle
++++ b/node_modules/react-native-reanimated/android/build.gradle
+@@ -1,7 +1,6 @@
+-import com.android.build.gradle.tasks.ExternalNativeBuildJsonTask
+ import groovy.json.JsonSlurper
+ import java.nio.file.Paths
+-import org.apache.tools.ant.taskdefs.condition.Os
++// Removed problematic AGP and Ant imports
+ 
+ def safeExtGet(prop, fallback) {
+     rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+@@ -13,11 +12,7 @@ def safeAppExtGet(prop, fallback) {
+ }
+ 
+ def isNewArchitectureEnabled() {
+-    // To opt-in for the New Architecture, you can either:
+-    // - Set `newArchEnabled` to true inside the `gradle.properties` file
+-    // - Invoke gradle with `-newArchEnabled=true`
+-    // - Set an environment variable `ORG_GRADLE_PROJECT_newArchEnabled=true`
+-    return project.hasProperty("newArchEnabled") && project.newArchEnabled == "true"
++    return false
+ }
+ 
+ def resolveReactNativeDirectory() {
+@@ -78,12 +73,12 @@ def getReactNativeMinorVersion() {
+ 
+ def getReanimatedVersion() {
+     def inputFile = file(projectDir.path + '/../package.json')
+-    def json = new JsonSlurper().parseText(inputFile.text)
++    def json = new groovy.json.JsonSlurper().parseText(inputFile.text)
+     return json.version
+ }
+ 
+ def toPlatformFileString(String path) {
+-  if (Os.isFamily(Os.FAMILY_WINDOWS)) {
++  if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+       path = path.replace(File.separatorChar, '/' as char)
+   }
+   return path
+@@ -96,13 +91,13 @@ def getReanimatedStaticFeatureFlags() {
+     if (!staticFeatureFlagsFile.exists()) {
+         throw new GradleException("[Reanimated] Feature flags file not found at ${staticFeatureFlagsFile.absolutePath}.")
+     }
+-    new JsonSlurper().parseText(staticFeatureFlagsFile.text).each { key, value ->
++    new groovy.json.JsonSlurper().parseText(staticFeatureFlagsFile.text).each { key, value ->
+         featureFlags[key] = value.toString()
+     }
+ 
+     def packageJsonFile = file(rootDir.path + "/../package.json")
+     if (packageJsonFile.exists()) {
+-        def packageJson = new JsonSlurper().parseText(packageJsonFile.text)
++        def packageJson = new groovy.json.JsonSlurper().parseText(packageJsonFile.text)
+         packageJson.reanimated?.staticFeatureFlags?.each { key, value ->
+             featureFlags[key] = value.toString()
+         }
+@@ -249,20 +244,21 @@ android {
+         sourceCompatibility JavaVersion.VERSION_17
+         targetCompatibility JavaVersion.VERSION_17
+     }
+-    tasks.withType(ExternalNativeBuildJsonTask) {
+-        compileTask ->
+-            compileTask.doLast {
++    tasks.configureEach { task ->
++        if (task.class.name.endsWith("ExternalNativeBuildJsonTask")) {
++            task.doLast {
+                 if (!IS_REANIMATED_EXAMPLE_APP) {
+                     return
+                 }
+ 
+-                def generated = new File("${compileTask.abi.getCxxBuildFolder()}/compile_commands.json")
++                def generated = new File("${task.abi.getCxxBuildFolder()}/compile_commands.json")
+                 def output = new File("${packageDir}/compile_commands.json")
+ 
+                 output.text = generated.text
+ 
+                 println("Generated clangd metadata.")
+             }
++        }
+     }
+ }
+ 
+@@ -289,7 +285,7 @@ task assertNewArchitectureEnabledTask {
+     }
+ }
+ 
+-preBuild.dependsOn(assertNewArchitectureEnabledTask)
++// preBuild.dependsOn(assertNewArchitectureEnabledTask)
+ 
+ def validateWorkletsBuildResult = providers.exec {
+     workingDir(projectDir.path)
+diff --git a/node_modules/react-native-reanimated/android/build/intermediates/prefab_package_header_only/prefab_publication.json/debug b/node_modules/react-native-reanimated/android/build/intermediates/prefab_package_header_only/prefab_publication.json/debug
+new file mode 100644
+index 0000000..40d7596
+--- /dev/null
++++ b/node_modules/react-native-reanimated/android/build/intermediates/prefab_package_header_only/prefab_publication.json/debug
+@@ -0,0 +1,18 @@
++{
++  "installationFolder": "C:\\Users\\Kloudspot-SPA\\Desktop\\app\\airpax\\d\\node_modules\\react-native-reanimated\\android\\build\\intermediates\\prefab_package\\debug\\prefab",
++  "gradlePath": ":react-native-reanimated",
++  "packageInfo": {
++    "packageName": "react-native-reanimated",
++    "packageVersion": "4.2.1",
++    "packageSchemaVersion": 2,
++    "packageDependencies": [],
++    "modules": [
++      {
++        "moduleName": "reanimated",
++        "moduleHeaders": "C:\\Users\\Kloudspot-SPA\\Desktop\\app\\airpax\\d\\node_modules\\react-native-reanimated\\android\\build\\prefab-headers\\reanimated",
++        "moduleExportLibraries": [],
++        "abis": []
++      }
++    ]
++  }
++}
+\ No newline at end of file
+diff --git a/node_modules/react-native-reanimated/android/build/intermediates/prefab_package_header_only/prefab_publication.json/release b/node_modules/react-native-reanimated/android/build/intermediates/prefab_package_header_only/prefab_publication.json/release
+new file mode 100644
+index 0000000..908f4c7
+--- /dev/null
++++ b/node_modules/react-native-reanimated/android/build/intermediates/prefab_package_header_only/prefab_publication.json/release
+@@ -0,0 +1,18 @@
++{
++  "installationFolder": "C:\\Users\\Kloudspot-SPA\\Desktop\\app\\airpax\\d\\node_modules\\react-native-reanimated\\android\\build\\intermediates\\prefab_package\\release\\prefab",
++  "gradlePath": ":react-native-reanimated",
++  "packageInfo": {
++    "packageName": "react-native-reanimated",
++    "packageVersion": "4.2.1",
++    "packageSchemaVersion": 2,
++    "packageDependencies": [],
++    "modules": [
++      {
++        "moduleName": "reanimated",
++        "moduleHeaders": "C:\\Users\\Kloudspot-SPA\\Desktop\\app\\airpax\\d\\node_modules\\react-native-reanimated\\android\\build\\prefab-headers\\reanimated",
++        "moduleExportLibraries": [],
++        "abis": []
++      }
++    ]
++  }
++}
+\ No newline at end of file

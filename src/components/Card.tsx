@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, StyleSheet, ViewProps, ViewStyle } from 'react-native';
-import { BlurView } from '@react-native-community/blur';
 import { COLORS, RADIUS, SPACING, SHADOWS } from '../theme';
 
 interface CardProps extends ViewProps {
@@ -19,11 +18,8 @@ export const Card: React.FC<CardProps> = ({
   if (variant === 'glass') {
     return (
       <View style={[styles.container, styles.glassContainer, style]} {...props}>
-        <BlurView
-          style={StyleSheet.absoluteFill}
-          blurType="dark"
-          blurAmount={20}
-          reducedTransparencyFallbackColor="black"
+        <View
+          style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(26, 26, 46, 0.8)' }]}
         />
         <View style={styles.glassContent}>
           {children}

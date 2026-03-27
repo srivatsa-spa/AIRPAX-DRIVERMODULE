@@ -30,4 +30,7 @@ export const driverService = {
     
   getShiftStatus: () =>
     apiClient.get<Shift | null>('/driver/shift/current'),
+
+  updateStatus: (isOnline: boolean) =>
+    apiClient.patch('/driver/status', { isOnline }),
 };

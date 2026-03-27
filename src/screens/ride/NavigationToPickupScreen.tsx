@@ -27,7 +27,13 @@ export const NavigateToPickupScreen = ({ navigation }: any) => {
     }
   };
 
-  if (!currentRide) return null;
+  if (isLoading || !currentRide) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Typography color={COLORS.primary}>Preparing Map...</Typography>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -84,7 +90,7 @@ export const NavigateToPickupScreen = ({ navigation }: any) => {
             pickup={currentRide.pickup.address || 'User Location'}
             drop={currentRide.dropoff.address || 'Destination'}
             distance={`${currentRide.distance} KM`}
-            fare={`₹${currentRide.fare}`}
+            fare={`₹${currentRide.fare?.total || 0}`}
             category="Mini"
           />
 

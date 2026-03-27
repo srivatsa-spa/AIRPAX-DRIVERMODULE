@@ -6,11 +6,46 @@ import { COLORS, SPACING } from '../../theme';
 import { useRideStore } from '../../store/useRideStore';
 import { rideService } from '../../api/rideService';
 import { useLocation } from '../../hooks/useLocation';
+import { decodePolyline } from '../../utils/mapUtils';
+import { useEffect } from 'react';
 
 export const RideProgressScreen = ({ navigation }: any) => {
   const { currentRide, updateRideStatus } = useRideStore();
   const { location } = useLocation();
   const [isLoading, setIsLoading] = useState(false);
+  const [routeCoordinates, setRouteCoordinates] = useState<any[]>([]);
+
+  const fetchRoute = async (start: any, end: any) => {
+    // Replace YOUR_API_KEY with real key (consistent with Rider App)
+    const API_KEY = 'GOOGLE_MAPS_API_KEY';
+    if (API_KEY === 'GOOGLE_MAPS_API_KEY') {
+       setRouteCoordinates([start, end]);
+       return;
+    }
+
+    try {
+      const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${start.latitude},${start.longitude}&destination=${end.latitude},${end.longitude}&key=${API_KEY}`;
+      const response = await fetch(url);
+      const json = await response.json();
+      if (json.routes.length > 0) {
+        const points = json.routes[0].overview_polyline.points;
+        const coords = decodePolyline(points);
+        setRouteCoordinates(coords);
+      }
+    } catch (error) {
+       console.error('Route Fetch Error:', error);
+       setRouteCoordinates([start, end]); 
+    }
+  };
+
+  useEffect(() => {
+    if (location && currentRide) {
+      fetchRoute(
+        { latitude: location.latitude, longitude: location.longitude },
+        { latitude: currentRide.dropoff?.latitude || 0, longitude: currentRide.dropoff?.longitude || 0 }
+      );
+    }
+  }, [location?.latitude, location?.longitude]);
 
   const handleEndRide = async () => {
     if (!currentRide) return;
@@ -36,8 +71,8 @@ export const RideProgressScreen = ({ navigation }: any) => {
         provider={PROVIDER_GOOGLE}
         style={styles.map}
         initialRegion={{
-          latitude: currentRide.dropoff.latitude,
-          longitude: currentRide.dropoff.longitude,
+          latitude: currentRide.dropoff?.latitude || 0,
+          longitude: currentRide.dropoff?.longitude || 0,
           latitudeDelta: 0.04,
           longitudeDelta: 0.04,
         }}
@@ -49,20 +84,18 @@ export const RideProgressScreen = ({ navigation }: any) => {
             coordinate={{ latitude: location.latitude, longitude: location.longitude }}
           />
         )}
-        <MapMarker 
-          type="drop" 
-          coordinate={{ latitude: currentRide.dropoff.latitude, longitude: currentRide.dropoff.longitude }}
-        />
+        {currentRide.dropoff && (
+          <MapMarker 
+            type="drop" 
+            coordinate={{ latitude: currentRide.dropoff.latitude, longitude: currentRide.dropoff.longitude }}
+          />
+        )}
         
-        {location && (
+        {routeCoordinates.length > 0 && (
           <Polyline 
-            coordinates={[
-              { latitude: location.latitude, longitude: location.longitude },
-              { latitude: currentRide.dropoff.latitude, longitude: currentRide.dropoff.longitude }
-            ]}
+            coordinates={routeCoordinates}
             strokeColor={COLORS.accent}
             strokeWidth={4}
-            geodesic={true}
           />
         )}
       </MapView>
@@ -82,7 +115,7 @@ export const RideProgressScreen = ({ navigation }: any) => {
               <Typography variant="body" color={COLORS.textSecondary}>{currentRide.distance} km remaining</Typography>
             </View>
             <View style={styles.alignRight}>
-              <Typography variant="h2">₹{currentRide.fare}</Typography>
+              <Typography variant="h2">₹{currentRide.fare?.total || 0}</Typography>
               <Typography variant="caption" color={COLORS.textSecondary}>Est. Fare</Typography>
             </View>
           </View>
@@ -94,7 +127,7 @@ export const RideProgressScreen = ({ navigation }: any) => {
             <View>
               <Typography variant="label">Dropping at</Typography>
               <Typography variant="body" color={COLORS.textSecondary}>
-                {currentRide.dropoff.address || 'Destination'}
+                {currentRide.dropoff?.address || 'Destination'}
               </Typography>
             </View>
           </View>

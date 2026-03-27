@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, View, TouchableOpacity, Switch } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Switch, Platform } from 'react-native';
+import { LocateFixed } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
@@ -18,6 +19,7 @@ export const DashboardScreen = ({ navigation }: any) => {
   const { driver, isOnline, setOnline } = useAppStore();
   const { location } = useLocation();
   const { currentRide } = useRideStore();
+  const [isInitialCentered, setIsInitialCentered] = React.useState(false);
 
   const { data: summary } = useQuery({
     queryKey: ['earningsSummary'],
@@ -37,27 +39,40 @@ export const DashboardScreen = ({ navigation }: any) => {
 
   const activeDestination = getDestination();
 
+  React.useEffect(() => {
+    if (location && !isInitialCentered && !activeDestination) {
+      mapRef.current?.animateToRegion({
+        latitude: location.latitude,
+        longitude: location.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      }, 1000);
+      setIsInitialCentered(true);
+    }
+  }, [location, isInitialCentered, activeDestination]);
+
   return (
     <View style={styles.container}>
       <MapView
         ref={mapRef}
         provider={PROVIDER_GOOGLE}
-        style={styles.map}
-        initialRegion={{
+         style={styles.map}
+         scrollEnabled={true}
+         zoomEnabled={true}
+         rotateEnabled={true}
+         pitchEnabled={true}
+         initialRegion={location ? {
+          latitude: location.latitude,
+          longitude: location.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        } : {
           latitude: 28.4595, // Default/fallback
           longitude: 77.0726,
           latitudeDelta: 0.04,
           longitudeDelta: 0.04,
         }}
-        region={location && !activeDestination ? {
-           // Only lock camera to driver if NO active route
-          latitude: location.latitude,
-          longitude: location.longitude,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        } : undefined}
-        showsUserLocation={true}
-        showsMyLocationButton={true}
+
       >
         {isOnline && location && (
           <MapMarker 
@@ -91,7 +106,20 @@ export const DashboardScreen = ({ navigation }: any) => {
         )}
       </MapView>
 
-      <SafeAreaView style={styles.overlay} edges={['top']}>
+      {!location && isOnline && (
+        <View style={styles.loadingOverlay}>
+          <Card variant="elevated" style={styles.loadingCard}>
+            <Typography variant="body" bold color={COLORS.primary}>
+              Finding your location...
+            </Typography>
+            <Typography variant="caption" color={COLORS.textSecondary}>
+              Please ensure GPS is enabled
+            </Typography>
+          </Card>
+        </View>
+      )}
+
+      <SafeAreaView style={styles.overlay} edges={['top']} pointerEvents="box-none">
         {/* TOP BAR */}
         <Card variant="elevated" style={styles.topBar}>
           <TouchableOpacity
@@ -111,6 +139,23 @@ export const DashboardScreen = ({ navigation }: any) => {
             </View>
           </TouchableOpacity>
         </Card>
+
+        {/* CURRENT LOCATION BUTTON */}
+        {!activeDestination && location && (
+          <TouchableOpacity 
+            style={styles.locationButton}
+            onPress={() => {
+              mapRef.current?.animateToRegion({
+                latitude: location.latitude,
+                longitude: location.longitude,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+              }, 1000);
+            }}
+          >
+            <LocateFixed size={24} color={COLORS.primary} strokeWidth={2.5} />
+          </TouchableOpacity>
+        )}
 
         {/* BOTTOM SECTION */}
         <View style={styles.bottomSection}>
@@ -249,5 +294,30 @@ const styles = StyleSheet.create({
   earningsLink: {
     marginTop: SPACING.lg,
     paddingVertical: SPACING.xs,
+  },
+  locationButton: {
+    position: 'absolute',
+    top: 100, // Below top bar
+    right: SPACING.md,
+    backgroundColor: COLORS.white,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...SHADOWS.medium,
+    zIndex: 10,
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255,255,255,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 20,
+  },
+  loadingCard: {
+    padding: SPACING.lg,
+    alignItems: 'center',
+    borderRadius: RADIUS.lg,
   },
 });
